@@ -31,8 +31,8 @@ class CeleryTaskConfiguration(NamedTuple):
 
 
 TASKS = [
-    CeleryTaskConfiguration('safe_transaction_service.history.tasks.index_internal_txs_task',
-                            'Index Internal Txs', 13, IntervalSchedule.SECONDS),
+    # CeleryTaskConfiguration('safe_transaction_service.history.tasks.index_internal_txs_task',
+    #                        'Index Internal Txs', 13, IntervalSchedule.SECONDS),
     # CeleryTaskConfiguration('safe_transaction_service.history.tasks.index_new_proxies_task',
     #                        'Index new Proxies', 15, IntervalSchedule.SECONDS),
     CeleryTaskConfiguration('safe_transaction_service.history.tasks.index_erc20_events_task',
@@ -41,8 +41,6 @@ TASKS = [
                             'Process Internal Txs', 2, IntervalSchedule.MINUTES),
     CeleryTaskConfiguration('safe_transaction_service.history.tasks.check_reorgs_task',
                             'Check Reorgs', 3, IntervalSchedule.MINUTES),
-    CeleryTaskConfiguration('safe_transaction_service.tokens.tasks.fix_pool_tokens_task',
-                            'Fix Pool Token Names', 1, IntervalSchedule.HOURS),
 ]
 
 MASTER_COPIES: Dict[EthereumNetwork, List[Tuple[str, int, str]]] = {
@@ -137,18 +135,19 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS('Task %s was already created' % task.name))
 
         self.stdout.write(self.style.SUCCESS('Setting up Safe Contract Addresses'))
-        ethereum_client = EthereumClientProvider()
-        ethereum_network = ethereum_client.get_network()
-        if ethereum_network in MASTER_COPIES:
-            self.stdout.write(self.style.SUCCESS(f'Setting up {ethereum_network.name} safe addresses'))
-            self._setup_safe_master_copies(MASTER_COPIES[ethereum_network])
-        if ethereum_network in PROXY_FACTORIES:
-            self.stdout.write(self.style.SUCCESS(f'Setting up {ethereum_network.name} proxy factory addresses'))
-            self._setup_safe_proxy_factories(PROXY_FACTORIES[ethereum_network])
+        self.setup_my_network()
 
-        if not (ethereum_network in MASTER_COPIES and ethereum_network in PROXY_FACTORIES):
-            self.stdout.write(self.style.WARNING('Cannot detect a valid ethereum-network'))
-
+    def setup_my_network(self):
+        SafeMasterCopy.objects.get_or_create(address='0x6C068d89dDF42F10f5c66bEB89bbCcD036C1fcb4',
+                                             defaults={
+                                                 'initial_block_number': 7398174,
+                                                 'tx_block_number': 7398174,
+                                             })
+        ProxyFactory.objects.get_or_create(address='0x345C53a241D9CB7C2B45380d8f683eD616057279',
+                                           defaults={
+                                               'initial_block_number': 7398179,
+                                               'tx_block_number': 7398179,
+                                           })
     def _setup_safe_master_copies(self, safe_master_copies: Sequence[Tuple[str, int, str]]):
         for address, initial_block_number, version in safe_master_copies:
             safe_master_copy, _ = SafeMasterCopy.objects.get_or_create(
