@@ -451,6 +451,7 @@ class SafeBalanceResponseSerializer(serializers.Serializer):
 
 class SafeBalanceUsdResponseSerializer(SafeBalanceResponseSerializer):
     eth_value = serializers.CharField()
+    timestamp = serializers.DateTimeField()
     fiat_balance = serializers.CharField()
     fiat_conversion = serializers.CharField()
     fiat_code = serializers.CharField()
@@ -506,6 +507,8 @@ class SafeInfoResponseSerializer(serializers.Serializer):
 class MasterCopyResponseSerializer(serializers.Serializer):
     address = EthereumAddressField()
     version = serializers.CharField()
+    deployed_block_number = serializers.IntegerField(source='initial_block_number')
+    last_indexed_block_number = serializers.IntegerField(source='tx_block_number')
 
 
 class OwnerResponseSerializer(serializers.Serializer):
