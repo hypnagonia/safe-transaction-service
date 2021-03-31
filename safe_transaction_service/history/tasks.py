@@ -116,7 +116,6 @@ def index_internal_txs_task(self) -> Optional[int]:
     with contextlib.suppress(LockError):
         with ony_one_running_task(self):
             logger.info('Start indexing of internal txs')
-            return
             number_traces = InternalTxIndexerProvider().start()
             logger.info('Find internal txs task processed %d traces', number_traces)
             if number_traces:
