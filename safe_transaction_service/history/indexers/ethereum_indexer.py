@@ -29,7 +29,7 @@ class EthereumIndexer(ABC):
     def __init__(self, ethereum_client: EthereumClient, confirmations: int = 1,
                  block_process_limit: int = 1000, updated_blocks_behind: int = 20,
                  query_chunk_size: int = 100, first_block_threshold: int = 150000,
-                 block_auto_process_limit: bool = True):
+                 block_auto_process_limit: bool = False):
         """
         :param ethereum_client:
         :param confirmations: Threshold of blocks to scan to prevent reorgs
